@@ -44,7 +44,6 @@ __all__ = base.__all__ +\
 class BikeShareSystemNotFound(Exception):
     pass
 
-
 def getDataFiles():
     return resource_listdir(__name__, 'data')
 
@@ -56,6 +55,23 @@ def getDataFile(system):
         )
     except NameError:
         raise NameError('File data/%s.json not found' % system)
+
+def getBikeShareSystems():
+    return [x.replace('.json','') for x in getDataFiles()]
+
+def getBikeShareSystemTags(system):
+    data = getDataFile(system)
+    if isinstance(data.get('class'), unicode):
+        return [sys['tag'] for sys in data['instances']]
+    elif isinstance(data.get('class'), dict):
+        tags=[]
+        clss = [cls for cls in data['class']]
+        for cls in clss:
+            for inst in data['class'][cls]['instances']:
+                tags.append(inst['tag'])
+        return tags
+    else:
+        raise Exception('Malformed system %s' % system)
 
 def getBikeShareSystem(system, tag, key = None):
     data = getDataFile(system)
